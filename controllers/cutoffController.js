@@ -1,6 +1,5 @@
-// controllers/cutoffController.js
 import XLSX from "xlsx";
-import University from "../models/University.js";
+import UniversityRegistration from "../models/University.js"; // ✅ fix import
 
 /**
  * Upload & parse cutoff Excel
@@ -32,7 +31,7 @@ export const uploadCutoffExcel = async (req, res) => {
     }));
 
     // Save into DB
-    const uni = await University.findById(req.params.universityId);
+    const uni = await UniversityRegistration.findById(req.params.universityId);
     if (!uni) {
       return res.status(404).json({ success: false, message: "University not found" });
     }
@@ -45,6 +44,7 @@ export const uploadCutoffExcel = async (req, res) => {
       message: "Cutoff data uploaded successfully",
       cutoffs,
     });
+
   } catch (err) {
     console.error("Error uploading cutoff Excel:", err);
     return res.status(500).json({ success: false, error: err.message });

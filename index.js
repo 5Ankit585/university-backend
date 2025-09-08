@@ -270,8 +270,8 @@ app.get("/api/universities", async (req, res) => {
 /* ------------------------ Mount Routers ------------------------ */
 app.use("/api/universities", universityRoutes);   // university.js ke routes
 app.use("/api/universities", uploadCourseRoutes); // uploadCourses.js ke routes
-app.use("/api/cutoffs", cutoffRoutes);
-app.use("/api/courses", uploadCoursesRoutes);
+app.use("/api/cutoff", cutoffRoutes);             // 
+
 
 
 /* ------------------------ Health check ------------------------ */
