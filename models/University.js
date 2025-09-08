@@ -86,6 +86,8 @@ const universityRegistrationSchema = new mongoose.Schema({
       highestLPA: String,
     },
   ],
+  recruitersLogos: [String],
+
 
   // Step 6: Admissions
   admissions: [admissionSchema],
