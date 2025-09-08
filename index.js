@@ -16,6 +16,7 @@ import { fileURLToPath } from "url";
 import cutoffRoutes from "./routes/cutoffRoutes.js";
 import universityRoutes from "./routes/university.js";
 import uploadCourseRoutes from "./routes/uploadCourses.js"; // ✅ add course upload router
+import admissionsRoutes from "./routes/admissions.js";
 
 const app = express();
 dotenv.config();
@@ -270,7 +271,8 @@ app.get("/api/universities", async (req, res) => {
 /* ------------------------ Mount Routers ------------------------ */
 app.use("/api/universities", universityRoutes);   // university.js ke routes
 app.use("/api/universities", uploadCourseRoutes); // uploadCourses.js ke routes
-app.use("/api/cutoff", cutoffRoutes);             // 
+app.use("/api/cutoff", cutoffRoutes);           // 
+app.use("/api/admissions", admissionsRoutes);
 
 
 
