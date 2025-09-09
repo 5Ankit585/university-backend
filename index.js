@@ -214,57 +214,44 @@ app.post("/register", async (req, res) => {
 });
 
 // University Registration
-app.post("/api/university-registration", uploadAny, async (req, res) => {
+app.post("/api/university-registration", upload.any(), async (req, res) => {
   try {
-    const body = req.body || {};
-    if (body.declaration === "on") body.declaration = true;
-    if (body.declaration === "off" || body.declaration === undefined)
-      body.declaration = false;
+    console.log("📥 Incoming body:", req.body);
 
-    // Parse JSON fields sent from frontend
-    if (body.branches) {
-      try {
-        body.branches = JSON.parse(body.branches);
-      } catch {
-        body.branches = [];
-      }
+    // ✅ Parse JSON fields
+    if (req.body.facilities) {
+      try { req.body.facilities = JSON.parse(req.body.facilities); }
+      catch { req.body.facilities = []; }
     }
-    if (body.facilities) {
-      try {
-        body.facilities = JSON.parse(body.facilities);
-      } catch {
-        body.facilities = [];
-      }
+    if (req.body.branches) {
+      try { req.body.branches = JSON.parse(req.body.branches); }
+      catch { req.body.branches = []; }
     }
 
-    // Collect uploaded files
-    const fileData = {};
-    if (req.files) {
-      req.files.forEach((file) => {
-        if (!fileData[file.fieldname]) fileData[file.fieldname] = [];
-        fileData[file.fieldname].push(file.path);
-      });
-    }
+    // ✅ Handle About Images
+    const aboutImages = req.files
+      ?.filter(f => f.fieldname === "aboutImages")
+      .map(f => f.path); // Cloudinary se URL milega
 
-    const newReg = new UniversityRegistration({
-      ...body,
-      ...fileData,
+    const newUniversity = new UniversityRegistration({
+      ...req.body,
+      aboutImages, // <-- yaha save karna
     });
 
-    await newReg.save();
+    await newUniversity.save();
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
-      message: "University registered successfully!",
-      data: newReg,
+      data: newUniversity,
     });
   } catch (err) {
-    console.error("Error in /api/university-registration:", err);
-    return res
-      .status(500)
-      .json({ success: false, error: err.message || "Internal server error" });
+    console.error("❌ Error registering university:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+
+
 
 // Get all universities
 app.get("/api/universities", async (req, res) => {
