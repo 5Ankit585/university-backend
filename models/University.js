@@ -41,6 +41,20 @@ const admissionSchema = new mongoose.Schema({
   avgPack: String,
 });
 
+/* ---------------- Branch Sub-schema ---------------- */
+const branchSchema = new mongoose.Schema({
+  name: String,
+  avgLPA: String,
+  highestLPA: String,
+});
+
+/* ---------------- Facilities Sub-schema ---------------- */
+const facilitySchema = new mongoose.Schema({
+  name: String,
+  description: String,
+});
+
+/* ---------------- University Schema ---------------- */
 const universityRegistrationSchema = new mongoose.Schema({
   // Step 1: Basic Info
   instituteName: String,
@@ -79,15 +93,8 @@ const universityRegistrationSchema = new mongoose.Schema({
 
   // Step 5: Placements
   placements: [placementSchema],
-  branches: [
-    {
-      name: String,
-      avgLPA: String,
-      highestLPA: String,
-    },
-  ],
+  branches: [branchSchema],
   recruitersLogos: [String],
-
 
   // Step 6: Admissions
   admissions: [admissionSchema],
@@ -95,24 +102,26 @@ const universityRegistrationSchema = new mongoose.Schema({
   scholarships: [String],
 
   // Step 7: Facilities
-  facilities: [
-    {
-      name: String,
-      description: String,
-    },
-  ],
+  facilities: [facilitySchema],
 
-  // Step 8: International, Account & Uploads
+  // Step 8: International Section
   intlStudentOffice: String,
   countriesEnrolled: String,
   foreignMoUs: String,
   languageSupport: String,
   visaSupport: String,
 
+  // Step 9: Gallery (✅ Fixed)
+  gallery: {
+  infraPhotos: { type: [String], default: [] },
+  eventPhotos: { type: [String], default: [] },
+  otherPhotos: { type: [String], default: [] }
+},
+
+
   // File uploads
   logo: [String],
   bannerImage: [String],
-  galleryImages: [String],
   photos: [String],
   videos: [String],
   courseFiles: [String],

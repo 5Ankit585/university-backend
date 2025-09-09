@@ -19,6 +19,10 @@ import uploadCourseRoutes from "./routes/uploadCourses.js"; // ✅ add course up
 import admissionsRoutes from "./routes/admissions.js";
 import recruitersRoutes from "./routes/recruitersRoutes.js";
 import placementsRoutes from "./routes/placementsRoutes.js";
+import galleryRoutes from "./routes/galleryRoutes.js";
+
+
+
 
 
 
@@ -279,6 +283,8 @@ app.use("/api/cutoff", cutoffRoutes);           //
 app.use("/api/admissions", admissionsRoutes);
 app.use("/api/recruiters", recruitersRoutes);
 app.use("/api/universities", placementsRoutes);
+app.use("/api/universities", galleryRoutes);
+
 
 
 
