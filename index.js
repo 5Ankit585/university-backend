@@ -217,6 +217,7 @@ app.post("/register", async (req, res) => {
 app.post("/api/university-registration", upload.any(), async (req, res) => {
   try {
     console.log("📥 Incoming body:", req.body);
+    console.log("📸 Incoming files:", req.files);
 
     // ✅ Parse JSON fields
     if (req.body.facilities) {
@@ -228,14 +229,24 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
       catch { req.body.branches = []; }
     }
 
-    // ✅ Handle About Images
+    // ✅ Handle file uploads
     const aboutImages = req.files
       ?.filter(f => f.fieldname === "aboutImages")
-      .map(f => f.path); // Cloudinary se URL milega
+      .map(f => f.path);
+
+    const logo = req.files
+      ?.filter(f => f.fieldname === "logo")
+      .map(f => f.path);
+
+    const bannerImages = req.files
+      ?.filter(f => f.fieldname === "bannerImage")
+      .map(f => f.path);
 
     const newUniversity = new UniversityRegistration({
       ...req.body,
-      aboutImages, // <-- yaha save karna
+      aboutImages,
+      logo,
+      bannerImage: bannerImages, // ✅ match schema
     });
 
     await newUniversity.save();
@@ -246,12 +257,9 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Error registering university:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, error: err.message || "Server error" });
   }
-});
-
-
-
+});   
 
 // Get all universities
 app.get("/api/universities", async (req, res) => {
