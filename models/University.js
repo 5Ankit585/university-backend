@@ -57,18 +57,18 @@ const facilitySchema = new mongoose.Schema({
 /* ---------------- University Schema ---------------- */
 const universityRegistrationSchema = new mongoose.Schema({
   // Step 0: Basic Info
-instituteName: String,
-type: String,
-year: String,
-ownership: String,
-accreditation: String,
-affiliation: String,
-students: String,
-faculty: String,
+  instituteName: String,
+  type: String,
+  year: String,
+  ownership: String,
+  accreditation: String,
+  affiliation: String,
+  students: String,
+  faculty: String,
 
-// Step 1: About Section
-description: String,       // ✅ matches frontend AboutUs.jsx
-aboutImages: [String],
+  // Step 1: About Section
+  description: String,       // ✅ matches frontend AboutUs.jsx
+  aboutImages: [String],
 
   // Step 2: Contact & Location
   address: String,
@@ -116,11 +116,22 @@ aboutImages: [String],
 
   // Step 9: Gallery (✅ Fixed)
   gallery: {
-  infraPhotos: { type: [String], default: [] },
-  eventPhotos: { type: [String], default: [] },
-  otherPhotos: { type: [String], default: [] }
-},
+    infraPhotos: { type: [String], default: [] },
+    eventPhotos: { type: [String], default: [] },
+    otherPhotos: { type: [String], default: [] },
+  },
 
+  /* ---------------- Info Section Extras ---------------- */
+  highestPackage: String,
+  avgPackage: String,
+  topRecruiters: [String],
+  popularCourses: [String],
+  campusSize: String,
+  hostelFee: String,
+  nirfRank: String,
+  library: String,
+  sportsFacilities: String,
+  studentRating: String,
 
   // File uploads
   logo: [String],
