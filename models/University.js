@@ -106,6 +106,7 @@ const universityRegistrationSchema = new mongoose.Schema({
 
   // Step 7: Facilities
   facilities: [facilitySchema],
+  
 
   // Step 8: International Section
   intlStudentOffice: String,
