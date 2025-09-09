@@ -56,16 +56,19 @@ const facilitySchema = new mongoose.Schema({
 
 /* ---------------- University Schema ---------------- */
 const universityRegistrationSchema = new mongoose.Schema({
-  // Step 1: Basic Info
-  instituteName: String,
-  type: String,
-  year: String,
-  ownership: String,
-  accreditation: String,
-  affiliation: String,
-  students: String,
-  faculty: String,
-  aboutUs: String,
+  // Step 0: Basic Info
+instituteName: String,
+type: String,
+year: String,
+ownership: String,
+accreditation: String,
+affiliation: String,
+students: String,
+faculty: String,
+
+// Step 1: About Section
+description: String,       // ✅ matches frontend AboutUs.jsx
+aboutImages: [String],
 
   // Step 2: Contact & Location
   address: String,
