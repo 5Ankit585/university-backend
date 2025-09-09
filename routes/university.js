@@ -48,6 +48,47 @@ router.post(
   uploadCoursesExcel
 );
 
+/* ✅ Upload Logo & Banner */
+router.post(
+  "/:id/media",
+  upload.fields([
+    { name: "logo", maxCount: 1 },
+    { name: "bannerImage", maxCount: 10 }, // multiple banner images
+  ]),
+  async (req, res) => {
+    try {
+      const university = await University.findById(req.params.id);
+      if (!university) {
+        return res.status(404).json({ message: "University not found" });
+      }
+
+      // Save logo
+      if (req.files.logo) {
+        university.logo = req.files.logo.map((f) => `/uploads/${f.filename}`);
+      }
+
+      // Save banner images
+      if (req.files.bannerImage) {
+        university.bannerImage = req.files.bannerImage.map(
+          (f) => `/uploads/${f.filename}`
+        );
+      }
+
+      await university.save();
+
+      res.json({
+        success: true,
+        message: "Media uploaded successfully",
+        university,
+      });
+    } catch (err) {
+      console.error("❌ Error uploading media:", err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+
 /* ✅ Get all courses of a university */
 // Endpoint: GET /api/universities/:id/courses
 router.get("/:id/courses", async (req, res) => {
