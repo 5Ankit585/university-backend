@@ -104,4 +104,45 @@ router.get("/:id/courses", async (req, res) => {
   }
 });
 
+
+
+// ✅ Get one university by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const uni = await UniversityRegistration.findById(req.params.id);
+    if (!uni) return res.status(404).json({ success: false, message: "University not found" });
+    res.json({ success: true, data: uni });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ✅ Update university by ID
+router.put("/:id", async (req, res) => {
+  try {
+    const uni = await UniversityRegistration.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!uni) return res.status(404).json({ success: false, message: "University not found" });
+    res.json({ success: true, data: uni });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ✅ Delete university by ID
+router.delete("/:id", async (req, res) => {
+  try {
+    const uni = await UniversityRegistration.findByIdAndDelete(req.params.id);
+    if (!uni) return res.status(404).json({ success: false, message: "University not found" });
+    res.json({ success: true, message: "University deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default router;
+
+

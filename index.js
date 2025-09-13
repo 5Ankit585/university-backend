@@ -125,6 +125,18 @@ const registrationSchema = new mongoose.Schema({
 });
 const Registration = mongoose.model("Registration", registrationSchema);
 
+/* ------------------------ News Schema ------------------------ */
+const newsSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  category: { type: String, default: "General" },
+  date: { type: Date, default: Date.now },
+  image: { type: String }, // Cloudinary URL
+});
+
+const News = mongoose.model("News", newsSchema);
+
+
 /* ------------------------ Routes (inline) ------------------------ */
 
 // Student signup
@@ -260,17 +272,100 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-  
+ 
 
-// Get all universities
-app.get("/api/universities", async (req, res) => {
+// Add News (with Cloudinary upload)
+app.post("/api/news", upload.single("image"), async (req, res) => {
   try {
-    const universities = await UniversityRegistration.find();
-    res.json({ success: true, universities });
+    const { title, description, category, date } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({ success: false, message: "Title and description required" });
+    }
+
+    const newNews = new News({
+      title,
+      description,
+      category,
+      date: date || new Date(),
+      image: req.file?.path || "" // Cloudinary auto uploads via multer-storage-cloudinary
+    });
+
+    await newNews.save();
+    res.status(201).json({ success: true, message: "News added successfully", news: newNews });
+  } catch (err) {
+    console.error("❌ Error adding news:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Get all news
+app.get("/api/news", async (req, res) => {
+  try {
+    const allNews = await News.find().sort({ date: -1 });
+    res.json({ success: true, news: allNews });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Delete news
+app.delete("/api/news/:id", async (req, res) => {
+  try {
+    const deleted = await News.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: "News not found" });
+    res.json({ success: true, message: "News deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+////    profile fetch endpoint for frontend    ////
+// Get a single university by ID
+app.get("/api/universities/:id", async (req, res) => {
+  try {
+    const uni = await UniversityRegistration.findById(req.params.id);
+    if (!uni) {
+      return res.status(404).json({ success: false, message: "University not found" });
+    }
+    res.json(uni); // frontend expects object, not { success, data }
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// Update university by ID
+app.put("/api/universities/:id", async (req, res) => {
+  try {
+    const updated = await UniversityRegistration.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true } // return updated doc
+    );
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "University not found" });
+    }
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Delete university by ID
+app.delete("/api/universities/:id", async (req, res) => {
+  try {
+    const deleted = await UniversityRegistration.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "University not found" });
+    }
+    res.json({ success: true, message: "University deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
 
 /* ------------------------ Mount Routers ------------------------ */
 app.use("/api/universities", universityRoutes);   // university.js ke routes
