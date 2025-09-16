@@ -21,11 +21,8 @@ import recruitersRoutes from "./routes/recruitersRoutes.js";
 import placementsRoutes from "./routes/placementsRoutes.js";
 import galleryRoutes from "./routes/galleryRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
-
-
-
-
-
+import examRoutes from "./routes/examRoutes.js";
+import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 
 
 const app = express();
@@ -378,8 +375,8 @@ app.use("/api/recruiters", recruitersRoutes);
 app.use("/api/universities", placementsRoutes);
 app.use("/api/universities", galleryRoutes);
 app.use("/api/courses", courseRoutes);
-
-
+app.use("/api/exams", examRoutes);
+app.use("/api/scholarships", scholarshipRoutes);
 
 
 
