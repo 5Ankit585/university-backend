@@ -24,9 +24,14 @@ export const getScholarships = async (req, res) => {
 // ✅ Delete Scholarship
 export const deleteScholarship = async (req, res) => {
   try {
-    await Scholarship.findByIdAndDelete(req.params.id);
+    const deleted = await Scholarship.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Scholarship not found" });
+    }
     res.json({ message: "Scholarship deleted successfully" });
   } catch (err) {
+    console.error("Error deleting scholarship:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
+
