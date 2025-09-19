@@ -40,7 +40,6 @@ router.get("/:id", async (req, res) => {
 });
 
 /* ✅ Upload & parse courses Excel */
-// Endpoint: POST /api/universities/:universityId/courses/upload
 // Form field name must be: "file"
 router.post(
   "/:universityId/courses/upload",
@@ -48,46 +47,61 @@ router.post(
   uploadCoursesExcel
 );
 
-/* ✅ Upload Logo & Banner */
+// backend/routes/universityRegistration.js
 router.post(
-  "/:id/media",
+  "/",
   upload.fields([
     { name: "logo", maxCount: 1 },
-    { name: "bannerImage", maxCount: 10 }, // multiple banner images
+    { name: "bannerImage", maxCount: 10 },
+    { name: "aboutImages", maxCount: 10 },
+    { name: "accreditationDoc", maxCount: 5 },
+    { name: "affiliationDoc", maxCount: 5 },
+    { name: "registrationDoc", maxCount: 5 },
+    { name: "videos", maxCount: 10 },
+    { name: "infraPhotos", maxCount: 20 },
+    { name: "eventPhotos", maxCount: 20 },
+    { name: "galleryImages", maxCount: 20 },
+    { name: "recruitersLogos", maxCount: 20 },
   ]),
   async (req, res) => {
     try {
-      const university = await University.findById(req.params.id);
-      if (!university) {
-        return res.status(404).json({ message: "University not found" });
-      }
+      // text fields
+      const uniData = { ...req.body };
 
-      // Save logo
-      if (req.files.logo) {
-        university.logo = req.files.logo.map((f) => `/uploads/${f.filename}`);
-      }
+      // handle file fields
+      const fileFields = [
+        "logo",
+        "bannerImage",
+        "aboutImages",
+        "accreditationDoc",
+        "affiliationDoc",
+        "registrationDoc",
+        "videos",
+        "recruitersLogos",
+      ];
 
-      // Save banner images
-      if (req.files.bannerImage) {
-        university.bannerImage = req.files.bannerImage.map(
-          (f) => `/uploads/${f.filename}`
-        );
-      }
-
-      await university.save();
-
-      res.json({
-        success: true,
-        message: "Media uploaded successfully",
-        university,
+      fileFields.forEach((field) => {
+        if (req.files[field]) {
+          uniData[field] = req.files[field].map(
+            (f) => `/uploads/${f.filename}`
+          );
+        }
       });
+
+      // gallery special handling
+      uniData.gallery = {
+        infraPhotos: req.files["infraPhotos"]?.map((f) => `/uploads/${f.filename}`) || [],
+        eventPhotos: req.files["eventPhotos"]?.map((f) => `/uploads/${f.filename}`) || [],
+        otherPhotos: req.files["galleryImages"]?.map((f) => `/uploads/${f.filename}`) || [],
+      };
+
+      const newUni = await University.create(uniData);
+      res.json({ success: true, data: newUni });
     } catch (err) {
-      console.error("❌ Error uploading media:", err);
       res.status(500).json({ error: err.message });
     }
   }
 );
-
 
 /* ✅ Get all courses of a university */
 // Endpoint: GET /api/universities/:id/courses

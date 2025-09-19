@@ -131,7 +131,9 @@ app.post("/register", async (req, res) => {
 app.post("/api/university-registration", upload.any(), async (req, res) => {
   try {
     console.log("📥 Incoming body:", req.body);
+    console.log("📂 Incoming files:", req.files?.map(f => ({ field: f.fieldname, url: f.path })));
 
+    // Parse JSON fields
     if (req.body.facilities) {
       try { req.body.facilities = JSON.parse(req.body.facilities); }
       catch { req.body.facilities = []; }
@@ -141,15 +143,26 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
       catch { req.body.branches = []; }
     }
 
-    const aboutImages = req.files?.filter(f => f.fieldname === "aboutImages").map(f => f.path);
-    const logo = req.files?.filter(f => f.fieldname === "logo").map(f => f.path);
-    const bannerImage = req.files?.filter(f => f.fieldname === "bannerImage").map(f => f.path);
+    // Helper to filter by fieldname
+    const getFiles = (field) =>
+      req.files?.filter((f) => f.fieldname === field).map((f) => f.path) || [];
 
     const newUniversity = new UniversityRegistration({
       ...req.body,
-      aboutImages,
-      logo,
-      bannerImage,
+      logo: getFiles("logo"),
+      bannerImage: getFiles("bannerImage"),
+      aboutImages: getFiles("aboutImages"),
+      accreditationDoc: getFiles("accreditationDoc"),
+      affiliationDoc: getFiles("affiliationDoc"),
+      registrationDoc: getFiles("registrationDoc"),
+      videos: getFiles("videos"),
+      photos: getFiles("photos"),
+      recruitersLogos: getFiles("recruitersLogos"),
+      gallery: {
+        infraPhotos: getFiles("infraPhotos"),
+        eventPhotos: getFiles("eventPhotos"),
+        otherPhotos: getFiles("galleryImages"),
+      },
     });
 
     await newUniversity.save();
@@ -163,6 +176,7 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // Add News
 app.post("/api/news", upload.single("image"), async (req, res) => {
