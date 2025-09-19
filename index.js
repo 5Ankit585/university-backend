@@ -5,17 +5,15 @@ import multer from "multer";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import UniversityRegistration from "./models/University.js";
-import uploadCoursesRoutes from "./routes/uploadCourses.js";
 import { fileURLToPath } from "url";
 
 /* -------- Routers -------- */
 import cutoffRoutes from "./routes/cutoffRoutes.js";
 import universityRoutes from "./routes/university.js";
-import uploadCourseRoutes from "./routes/uploadCourses.js"; // ✅ add course upload router
+import uploadCourseRoutes from "./routes/uploadCourses.js";
 import admissionsRoutes from "./routes/admissions.js";
 import recruitersRoutes from "./routes/recruitersRoutes.js";
 import placementsRoutes from "./routes/placementsRoutes.js";
@@ -23,7 +21,7 @@ import galleryRoutes from "./routes/galleryRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import examRoutes from "./routes/examRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
-
+import signupRoutes from "./routes/signup.js";   // ✅ imported
 
 const app = express();
 dotenv.config();
@@ -66,27 +64,15 @@ const uploadFolder = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder, { recursive: true });
 app.use("/uploads", express.static(uploadFolder));
 
-/* ------------------------ Multer + Cloudinary ------------------------ */
+/* ------------------------ Multer + Cloudinary (for news/universities) ------------------------ */
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => ({
+  params: async () => ({
     folder: "universities",
     resource_type: "auto",
   }),
 });
 const upload = multer({ storage });
-const uploadAny = upload.any();
-
-/* ------------------------ Helper ------------------------ */
-function getUploadedFilePath(files, fieldName) {
-  if (!files) return "";
-  if (Array.isArray(files)) {
-    const f = files.find((x) => x.fieldname === fieldName);
-    return f?.path || "";
-  }
-  if (files[fieldName]?.[0]) return files[fieldName][0].path || "";
-  return "";
-}
 
 /* ------------------------ Mongo connection ------------------------ */
 const mongoURI =
@@ -95,25 +81,6 @@ mongoose
   .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-/* ------------------------ Student Schema ------------------------ */
-const studentSchema = new mongoose.Schema({
-  name: String,
-  phone: String,
-  email: String,
-  password: String, // hashed
-  address: String,
-  pincode: String,
-  university: String,
-  course: String,
-  branch: String,
-  academicDetails: String,
-  counsellingBook: String,
-  documents: String,
-  scholarshipDoc: String,
-  createdAt: { type: Date, default: Date.now },
-});
-const Student = mongoose.model("Student", studentSchema);
 
 /* ------------------------ Registration Schema ------------------------ */
 const registrationSchema = new mongoose.Schema({
@@ -130,75 +97,11 @@ const newsSchema = new mongoose.Schema({
   description: { type: String, required: true },
   category: { type: String, default: "General" },
   date: { type: Date, default: Date.now },
-  image: { type: String }, // Cloudinary URL
+  image: { type: String },
 });
-
 const News = mongoose.model("News", newsSchema);
 
-
 /* ------------------------ Routes (inline) ------------------------ */
-
-// Student signup
-app.post("/api/students", uploadAny, async (req, res) => {
-  try {
-    const {
-      name,
-      phone,
-      email,
-      password,
-      address,
-      pincode,
-      university,
-      course,
-      branch,
-      academicDetails,
-      counsellingBook,
-    } = req.body || {};
-
-    const missing = [];
-    if (!name) missing.push("name");
-    if (!email) missing.push("email");
-    if (!password) missing.push("password");
-    if (!phone) missing.push("phone");
-    if (missing.length) {
-      return res
-        .status(400)
-        .json({ success: false, error: `Missing required fields: ${missing.join(", ")}` });
-    }
-
-    const documentsPath = getUploadedFilePath(req.files, "documents");
-    const scholarshipPath = getUploadedFilePath(req.files, "scholarshipDoc");
-
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newStudent = new Student({
-      name,
-      phone,
-      email,
-      password: hashedPassword,
-      address,
-      pincode,
-      university,
-      course,
-      branch,
-      academicDetails,
-      counsellingBook,
-      documents: documentsPath,
-      scholarshipDoc: scholarshipPath,
-    });
-
-    await newStudent.save();
-    return res
-      .status(201)
-      .json({ success: true, message: "Student registered successfully!" });
-  } catch (err) {
-    console.error("Error in /api/students:", err);
-    return res
-      .status(500)
-      .json({ success: false, error: err.message || "Internal server error" });
-  }
-});
 
 // Registration modal
 app.post("/register", async (req, res) => {
@@ -228,8 +131,9 @@ app.post("/register", async (req, res) => {
 app.post("/api/university-registration", upload.any(), async (req, res) => {
   try {
     console.log("📥 Incoming body:", req.body);
+    console.log("📂 Incoming files:", req.files?.map(f => ({ field: f.fieldname, url: f.path })));
 
-    // ✅ Parse JSON fields
+    // Parse JSON fields
     if (req.body.facilities) {
       try { req.body.facilities = JSON.parse(req.body.facilities); }
       catch { req.body.facilities = []; }
@@ -239,25 +143,26 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
       catch { req.body.branches = []; }
     }
 
-    // ✅ Handle Files
-    const aboutImages = req.files
-      ?.filter(f => f.fieldname === "aboutImages")
-      .map(f => f.path);
+    // Helper to filter by fieldname
+    const getFiles = (field) =>
+      req.files?.filter((f) => f.fieldname === field).map((f) => f.path) || [];
 
-    const logo = req.files
-      ?.filter(f => f.fieldname === "logo")
-      .map(f => f.path);
-
-    const bannerImage = req.files
-      ?.filter(f => f.fieldname === "bannerImage")
-      .map(f => f.path);
-
-    // ✅ Save University
     const newUniversity = new UniversityRegistration({
       ...req.body,
-      aboutImages,
-      logo,
-      bannerImage,
+      logo: getFiles("logo"),
+      bannerImage: getFiles("bannerImage"),
+      aboutImages: getFiles("aboutImages"),
+      accreditationDoc: getFiles("accreditationDoc"),
+      affiliationDoc: getFiles("affiliationDoc"),
+      registrationDoc: getFiles("registrationDoc"),
+      videos: getFiles("videos"),
+      photos: getFiles("photos"),
+      recruitersLogos: getFiles("recruitersLogos"),
+      gallery: {
+        infraPhotos: getFiles("infraPhotos"),
+        eventPhotos: getFiles("eventPhotos"),
+        otherPhotos: getFiles("galleryImages"),
+      },
     });
 
     await newUniversity.save();
@@ -271,9 +176,9 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
- 
 
-// Add News (with Cloudinary upload)
+
+// Add News
 app.post("/api/news", upload.single("image"), async (req, res) => {
   try {
     const { title, description, category, date } = req.body;
@@ -287,7 +192,7 @@ app.post("/api/news", upload.single("image"), async (req, res) => {
       description,
       category,
       date: date || new Date(),
-      image: req.file?.path || "" // Cloudinary auto uploads via multer-storage-cloudinary
+      image: req.file?.path || ""
     });
 
     await newNews.save();
@@ -319,29 +224,22 @@ app.delete("/api/news/:id", async (req, res) => {
   }
 });
 
-
-////    profile fetch endpoint for frontend    ////
-// Get a single university by ID
+// University profile fetch/update/delete
 app.get("/api/universities/:id", async (req, res) => {
   try {
     const uni = await UniversityRegistration.findById(req.params.id);
     if (!uni) {
       return res.status(404).json({ success: false, message: "University not found" });
     }
-    res.json(uni); // frontend expects object, not { success, data }
+    res.json(uni);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// Update university by ID
 app.put("/api/universities/:id", async (req, res) => {
   try {
-    const updated = await UniversityRegistration.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true } // return updated doc
-    );
+    const updated = await UniversityRegistration.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) {
       return res.status(404).json({ success: false, message: "University not found" });
     }
@@ -351,7 +249,6 @@ app.put("/api/universities/:id", async (req, res) => {
   }
 });
 
-// Delete university by ID
 app.delete("/api/universities/:id", async (req, res) => {
   try {
     const deleted = await UniversityRegistration.findByIdAndDelete(req.params.id);
@@ -364,12 +261,11 @@ app.delete("/api/universities/:id", async (req, res) => {
   }
 });
 
-
-
 /* ------------------------ Mount Routers ------------------------ */
-app.use("/api/universities", universityRoutes);   // university.js ke routes
-app.use("/api/universities", uploadCourseRoutes); // uploadCourses.js ke routes
-app.use("/api/cutoff", cutoffRoutes);           // 
+app.use("/api/signup", signupRoutes);  // ✅ cleaned
+app.use("/api/universities", universityRoutes);
+app.use("/api/universities", uploadCourseRoutes);
+app.use("/api/cutoff", cutoffRoutes);
 app.use("/api/admissions", admissionsRoutes);
 app.use("/api/recruiters", recruitersRoutes);
 app.use("/api/universities", placementsRoutes);
@@ -377,8 +273,6 @@ app.use("/api/universities", galleryRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/scholarships", scholarshipRoutes);
-
-
 
 /* ------------------------ Health check ------------------------ */
 app.get("/api/health", (req, res) => {
