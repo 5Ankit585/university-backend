@@ -44,9 +44,10 @@ const admissionSchema = new mongoose.Schema({
 /* ---------------- Branch Sub-schema ---------------- */
 const branchSchema = new mongoose.Schema({
   name: String,
-  avgLPA: String,
-  highestLPA: String,
+  avgPackage: String,
+  highestPackage: String,
 });
+
 
 /* ---------------- Facilities Sub-schema ---------------- */
 const facilitySchema = new mongoose.Schema({
@@ -98,7 +99,8 @@ const universityRegistrationSchema = new mongoose.Schema({
   placements: [placementSchema],
   branches: [branchSchema],
   recruitersLogos: [String],
-
+  placementRate: String, 
+  
   // Step 6: Admissions
   admissions: [admissionSchema],
   admissionDetails: String,
