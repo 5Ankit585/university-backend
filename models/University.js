@@ -45,9 +45,8 @@ const admissionSchema = new mongoose.Schema({
 const branchSchema = new mongoose.Schema({
   name: String,
   avgPackage: String,
-  highestPackage: String,
+  highestPackage: String,
 });
-
 
 /* ---------------- Facilities Sub-schema ---------------- */
 const facilitySchema = new mongoose.Schema({
@@ -99,8 +98,8 @@ const universityRegistrationSchema = new mongoose.Schema({
   placements: [placementSchema],
   branches: [branchSchema],
   recruitersLogos: [String],
-  placementRate: String, 
-  
+  placementRate: String,
+
   // Step 6: Admissions
   admissions: [admissionSchema],
   admissionDetails: String,
@@ -109,7 +108,6 @@ const universityRegistrationSchema = new mongoose.Schema({
   // Step 7: Facilities
   facilities: [facilitySchema],
   
-
   // Step 8: International Section
   intlStudentOffice: String,
   countriesEnrolled: String,
@@ -122,6 +120,18 @@ const universityRegistrationSchema = new mongoose.Schema({
     infraPhotos: { type: [String], default: [] },
     eventPhotos: { type: [String], default: [] },
     otherPhotos: { type: [String], default: [] },
+  },
+
+  // Step 9: Documents
+  docs: {
+    type: Object,
+    default: {
+      accreditationDoc: [],
+      affiliationDoc: [],
+      registrationDoc: [],
+      videos: [],
+      courseFiles: [],
+    },
   },
 
   /* ---------------- Info Section Extras ---------------- */
