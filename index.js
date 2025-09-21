@@ -93,12 +93,18 @@ const Registration = mongoose.model("Registration", registrationSchema);
 
 /* ------------------------ News Schema ------------------------ */
 const newsSchema = new mongoose.Schema({
+  universityId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UniversityRegistration",
+    required: true,
+  },
   title: { type: String, required: true },
   description: { type: String, required: true },
   category: { type: String, default: "General" },
   date: { type: Date, default: Date.now },
   image: { type: String },
 });
+
 const News = mongoose.model("News", newsSchema);
 
 /* ------------------------ Routes (inline) ------------------------ */
@@ -181,13 +187,14 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
 // Add News
 app.post("/api/news", upload.single("image"), async (req, res) => {
   try {
-    const { title, description, category, date } = req.body;
+    const { title, description, category, date, universityId } = req.body;
 
-    if (!title || !description) {
-      return res.status(400).json({ success: false, message: "Title and description required" });
+    if (!title || !description || !universityId) {
+      return res.status(400).json({ success: false, message: "Title, description and universityId are required" });
     }
 
     const newNews = new News({
+      universityId,
       title,
       description,
       category,
@@ -204,14 +211,15 @@ app.post("/api/news", upload.single("image"), async (req, res) => {
 });
 
 // Get all news
-app.get("/api/news", async (req, res) => {
+app.get("/api/universities/:id/news", async (req, res) => {
   try {
-    const allNews = await News.find().sort({ date: -1 });
-    res.json({ success: true, news: allNews });
+    const uniNews = await News.find({ universityId: req.params.id }).sort({ date: -1 });
+    res.json({ success: true, news: uniNews });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
 
 // Delete news
 app.delete("/api/news/:id", async (req, res) => {
