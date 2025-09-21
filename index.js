@@ -104,7 +104,6 @@ const newsSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   image: { type: String },
 });
-
 const News = mongoose.model("News", newsSchema);
 
 /* ------------------------ Routes (inline) ------------------------ */
