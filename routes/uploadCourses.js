@@ -10,6 +10,7 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+/* ---------------- Upload courses Excel ---------------- */
 router.post("/upload-courses/:id", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
@@ -62,5 +63,20 @@ router.post("/upload-courses/:id", upload.single("file"), async (req, res) => {
     });
   }
 });
+
+/* ---------------- Get courses for a university ---------------- */
+router.get("/:id/courses", async (req, res) => {
+  try {
+    const university = await UniversityRegistration.findById(req.params.id).select("courses");
+    if (!university) {
+      return res.status(404).json({ error: "University not found" });
+    }
+    res.json({ success: true, courses: university.courses || [] });
+  } catch (err) {
+    console.error("❌ Error fetching courses:", err);
+    res.status(500).json({ error: "Failed to fetch courses" });
+  }
+});
+
 
 export default router;
