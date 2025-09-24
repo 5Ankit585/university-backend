@@ -9,8 +9,6 @@ import fs from "fs";
 import path from "path";
 import UniversityRegistration from "./models/University.js";
 import { fileURLToPath } from "url";
-
-/* -------- Routers -------- */
 import cutoffRoutes from "./routes/cutoffRoutes.js";
 import universityRoutes from "./routes/university.js";
 import uploadCourseRoutes from "./routes/uploadCourses.js";
@@ -21,7 +19,7 @@ import galleryRoutes from "./routes/galleryRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import examRoutes from "./routes/examRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
-import signupRoutes from "./routes/signup.js";   // ✅ imported
+import signupRoutes from "./routes/signup.js";
 
 const app = express();
 dotenv.config();
@@ -38,7 +36,7 @@ const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:3001",
   "http://127.0.0.1:3000",
-  "http://localhost:5173", // Vite
+  "http://localhost:5173",
   process.env.FRONTEND_ORIGIN,
 ].filter(Boolean);
 
@@ -60,11 +58,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ------------------------ Uploads folder ------------------------ */
-const uploadFolder = path.join(__dirname, "uploads");
+const uploadFolder = path.join(__dirname, "Uploads");
 if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder, { recursive: true });
 app.use("/uploads", express.static(uploadFolder));
 
-/* ------------------------ Multer + Cloudinary (for news/universities) ------------------------ */
+/* ------------------------ Multer + Cloudinary ------------------------ */
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async () => ({
@@ -107,8 +105,6 @@ const newsSchema = new mongoose.Schema({
 const News = mongoose.model("News", newsSchema);
 
 /* ------------------------ Routes (inline) ------------------------ */
-
-// Registration modal
 app.post("/register", async (req, res) => {
   try {
     const { name, mobileNumber, location } = req.body || {};
@@ -132,13 +128,11 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// University Registration
 app.post("/api/university-registration", upload.any(), async (req, res) => {
   try {
     console.log("📥 Incoming body:", req.body);
     console.log("📂 Incoming files:", req.files?.map(f => ({ field: f.fieldname, url: f.path })));
 
-    // Parse JSON fields
     if (req.body.facilities) {
       try { req.body.facilities = JSON.parse(req.body.facilities); }
       catch { req.body.facilities = []; }
@@ -148,7 +142,6 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
       catch { req.body.branches = []; }
     }
 
-    // Helper to filter by fieldname
     const getFiles = (field) =>
       req.files?.filter((f) => f.fieldname === field).map((f) => f.path) || [];
 
@@ -182,8 +175,6 @@ app.post("/api/university-registration", upload.any(), async (req, res) => {
   }
 });
 
-
-// Add News
 app.post("/api/news", upload.single("image"), async (req, res) => {
   try {
     const { title, description, category, date, universityId } = req.body;
@@ -209,7 +200,6 @@ app.post("/api/news", upload.single("image"), async (req, res) => {
   }
 });
 
-// Get all news
 app.get("/api/universities/:id/news", async (req, res) => {
   try {
     const uniNews = await News.find({ universityId: req.params.id }).sort({ date: -1 });
@@ -219,8 +209,6 @@ app.get("/api/universities/:id/news", async (req, res) => {
   }
 });
 
-
-// Delete news
 app.delete("/api/news/:id", async (req, res) => {
   try {
     const deleted = await News.findByIdAndDelete(req.params.id);
@@ -231,7 +219,6 @@ app.delete("/api/news/:id", async (req, res) => {
   }
 });
 
-// University profile fetch/update/delete
 app.get("/api/universities/:id", async (req, res) => {
   try {
     const uni = await UniversityRegistration.findById(req.params.id);
@@ -269,7 +256,7 @@ app.delete("/api/universities/:id", async (req, res) => {
 });
 
 /* ------------------------ Mount Routers ------------------------ */
-app.use("/api/signup", signupRoutes);  // ✅ cleaned
+app.use("/api/signup", signupRoutes);
 app.use("/api/universities", universityRoutes);
 app.use("/api/universities", uploadCourseRoutes);
 app.use("/api/cutoff", cutoffRoutes);
@@ -279,7 +266,8 @@ app.use("/api/universities", placementsRoutes);
 app.use("/api/universities", galleryRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
-app.use("/api/scholarships", scholarshipRoutes);
+app.use("/api/universities", scholarshipRoutes);
+
 
 /* ------------------------ Health check ------------------------ */
 app.get("/api/health", (req, res) => {

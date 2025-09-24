@@ -1,19 +1,24 @@
 import mongoose from "mongoose";
 
 const scholarshipSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  provider: { type: String },
-  category: { type: String },
-  income: { type: String },
-  educationLevel: { type: String },
-  benefits: { type: String },
-  deadline: { type: String },
-  status: { type: String },
-  description: { type: String },
-  eligibility: { type: String },
-  type: { type: String },
-  region: { type: String },
-  generalQuota: { type: String },
+  universityId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "University",
+    required: true,
+  },
+  name: String,
+  provider: String,
+  category: String,
+  income: String,
+  educationLevel: String,
+  benefits: String,
+  deadline: String,
+  status: String,
+  description: String,
+  eligibility: String,
+  type: String,
+  region: String,
+  generalQuota: String,
   tags: [String],
 }, { timestamps: true });
 
