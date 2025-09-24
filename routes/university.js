@@ -20,10 +20,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-/* ✅ Test route */
-router.get("/", (req, res) => {
-  res.send("Universities API working!");
+// ✅ Get all universities
+router.get("/", async (req, res) => {
+  try {
+    const universities = await University.find(); // <-- uses University model
+    res.json({ success: true, data: universities });
+  } catch (err) {
+    console.error("Error fetching universities:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
+
 
 /* ✅ Get university by ID */
 router.get("/:id", async (req, res) => {
