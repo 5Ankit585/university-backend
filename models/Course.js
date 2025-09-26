@@ -12,7 +12,13 @@ const courseSchema = new mongoose.Schema(
     highlights: String,
     internship: String,
     placement: String,
-    specializations: String,
+    specializations: [
+      {
+        name: { type: String, required: true },
+        image: String,
+        description: String,
+      },
+    ],
     eligibility: String,
     admissionProcess: String,
     curriculum: String,
@@ -22,17 +28,9 @@ const courseSchema = new mongoose.Schema(
     abroadOptions: String,
     faqs: String,
     applyLink: String,
-
-    // NEW FIELDS
-    specializationImages: [
-      {
-        url: String,
-        description: String,
-      },
-    ],
     topInstituteImages: [
       {
-        url: String,
+        url: { type: String, required: true },
         description: String,
       },
     ],

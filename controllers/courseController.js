@@ -26,22 +26,62 @@ export const createCourse = async (req, res) => {
   try {
     const { body, files } = req;
 
-    // Handle specialization images
-    const specializationImages = (files.specializationImages || []).map((file, idx) => ({
-      url: file.path, // path where multer saved the file
-      description: Array.isArray(body.specializationDescriptions)
-        ? body.specializationDescriptions[idx] || ""
-        : body.specializationDescriptions || "",
+    // === Specializations ===
+    const specializationNames = Array.isArray(body.specializationNames)
+      ? body.specializationNames
+      : typeof body.specializationNames === "string"
+      ? [body.specializationNames]
+      : [];
+    const specializationDescriptions = Array.isArray(body.specializationDescriptions)
+      ? body.specializationDescriptions
+      : typeof body.specializationDescriptions === "string"
+      ? [body.specializationDescriptions]
+      : [];
+    const specializationImages = Array.isArray(files?.specializationImages)
+      ? files.specializationImages
+      : [];
+
+    // Validate lengths to prevent mismatches
+    if (
+      specializationImages.length &&
+      (specializationImages.length !== specializationNames.length ||
+        specializationImages.length !== specializationDescriptions.length)
+    ) {
+      return res.status(400).json({ error: "Mismatch in specialization data (names, images, descriptions)" });
+    }
+
+    // Map specializations
+    const specializations = specializationNames.map((name, idx) => ({
+      name: name || `Specialization ${idx + 1}`,
+      image: specializationImages[idx]?.path || "",
+      description: specializationDescriptions[idx] || "",
     }));
 
-    // Handle top institute images
-    const topInstituteImages = (files.topInstituteImages || []).map((file, idx) => ({
+    // === Top Institutes ===
+    const topInstituteDescriptions = Array.isArray(body.topInstituteDescriptions)
+      ? body.topInstituteDescriptions
+      : typeof body.topInstituteDescriptions === "string"
+      ? [body.topInstituteDescriptions]
+      : [];
+    const topInstituteImages = Array.isArray(files?.topInstituteImages)
+      ? files.topInstituteImages
+      : [];
+
+    // Validate lengths for top institutes
+    if (
+      topInstituteImages.length &&
+      topInstituteImages.length !== topInstituteDescriptions.length
+    ) {
+      return res.status(400).json({ error: "Mismatch in top institute descriptions and images" });
+    }
+
+    // Map top institute images
+    const topInstitutesData = topInstituteImages.map((file, idx) => ({
       url: file.path,
-      description: Array.isArray(body.topInstituteDescriptions)
-        ? body.topInstituteDescriptions[idx] || ""
-        : body.topInstituteDescriptions || "",
+      description: topInstituteDescriptions[idx] || "",
     }));
 
+    // Create new course
     const course = new Course({
       courseTitle: body.courseTitle,
       shortName: body.shortName,
@@ -53,7 +93,6 @@ export const createCourse = async (req, res) => {
       highlights: body.highlights,
       internship: body.internship,
       placement: body.placement,
-      specializations: body.specializations,
       eligibility: body.eligibility,
       admissionProcess: body.admissionProcess,
       curriculum: body.curriculum,
@@ -63,8 +102,8 @@ export const createCourse = async (req, res) => {
       abroadOptions: body.abroadOptions,
       faqs: body.faqs,
       applyLink: body.applyLink,
-      specializationImages,
-      topInstituteImages,
+      specializations,
+      topInstituteImages: topInstitutesData,
     });
 
     await course.save();
