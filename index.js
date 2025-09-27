@@ -20,6 +20,7 @@ import courseRoutes from "./routes/courseRoutes.js";
 import examRoutes from "./routes/examRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 import signupRoutes from "./routes/signup.js";
+import instituteRoutes from "./routes/instituteRoutes.js";
 
 const app = express();
 dotenv.config();
@@ -267,6 +268,9 @@ app.use("/api/universities", galleryRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/universities", scholarshipRoutes);
+app.use("/api/institutes", instituteRoutes);
+app.use("/api/institutes", instituteRoutes);
+
 
 
 /* ------------------------ Health check ------------------------ */
