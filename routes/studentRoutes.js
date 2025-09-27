@@ -1,11 +1,9 @@
-// routes/studentRoutes.js
 import express from "express";
 import upload from "../middlewares/multer.js";
 import { addStudent } from "../controllers/studentController.js";
 
 const router = express.Router();
 
-// multiple files with field names
 const fields = [
   { name: "marksheet", maxCount: 1 },
   { name: "tc", maxCount: 1 },

@@ -5,10 +5,9 @@ import multer from "multer";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import fs from "fs";
-import path from "path";
 import UniversityRegistration from "./models/University.js";
-import { fileURLToPath } from "url";
+
+// Routes
 import cutoffRoutes from "./routes/cutoffRoutes.js";
 import universityRoutes from "./routes/university.js";
 import uploadCourseRoutes from "./routes/uploadCourses.js";
@@ -22,8 +21,8 @@ import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 import signupRoutes from "./routes/signup.js";
 import instituteRoutes from "./routes/instituteRoutes.js";
 
-const app = express();
 dotenv.config();
+const app = express();
 
 /* ------------------------ Cloudinary config ------------------------ */
 cloudinary.config({
@@ -54,15 +53,6 @@ app.options("*", cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-/* ------------------------ __dirname setup ------------------------ */
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-/* ------------------------ Uploads folder ------------------------ */
-const uploadFolder = path.join(__dirname, "Uploads");
-if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder, { recursive: true });
-app.use("/uploads", express.static(uploadFolder));
-
 /* ------------------------ Multer + Cloudinary ------------------------ */
 const storage = new CloudinaryStorage({
   cloudinary,
@@ -74,8 +64,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 /* ------------------------ Mongo connection ------------------------ */
-const mongoURI =
-  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/findmycollege";
+const mongoURI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/findmycollege";
 mongoose
   .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ MongoDB connected"))
@@ -104,6 +93,50 @@ const newsSchema = new mongoose.Schema({
   image: { type: String },
 });
 const News = mongoose.model("News", newsSchema);
+
+/* ------------------------ Student Schema ------------------------ */
+const studentSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  university: { type: String, required: true },
+  status: { type: String, default: "Pending" },
+  details: {
+    fullName: { type: String, required: true },
+    dateOfBirth: { type: String, required: true },
+    gender: { type: String, required: true },
+    contactNumber: { type: String, required: true },
+    email: { type: String, required: true },
+    address: { type: String, required: true },
+    parentName: { type: String, required: true },
+    parentContact: { type: String, required: true },
+    board: { type: String, required: true },
+    stream: { type: String, required: true },
+    schoolName: { type: String, required: true },
+    yearOfPassing: { type: String, required: true },
+    subjects: [{ type: String }],
+    totalPercentage: { type: String, required: true },
+    rollNumber: { type: String, required: true },
+    course: { type: String, required: true },
+    specialization: { type: String },
+    mode: { type: String, required: true },
+    hostelRequired: { type: String, required: true },
+    university: { type: String, required: true },
+    documents: {
+      marksheet: { type: String, required: true },
+      tc: { type: String, required: true },
+      migration: { type: String, required: true },
+      photo: { type: String, required: true },
+      idProof: { type: String, required: true },
+    },
+    paymentReceipt: { type: String },
+    declaration: { type: Boolean, required: true },
+    studentSignature: { type: String },
+    guardianSignature: { type: String },
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+const Student = mongoose.model("Student", studentSchema);
 
 /* ------------------------ Routes (inline) ------------------------ */
 app.post("/register", async (req, res) => {
@@ -256,6 +289,65 @@ app.delete("/api/universities/:id", async (req, res) => {
   }
 });
 
+/* ------------------------ Student Routes ------------------------ */
+app.post("/api/students", async (req, res) => {
+  try {
+    const { name, email, university, status, details, createdAt, updatedAt } = req.body;
+
+    if (!name || !email || !university || !details) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, university, and details are required",
+      });
+    }
+
+    const newStudent = new Student({
+      name,
+      email,
+      university,
+      status,
+      details,
+      createdAt,
+      updatedAt,
+    });
+
+    await newStudent.save();
+    res.status(201).json({
+      success: true,
+      message: "Student added successfully",
+      data: newStudent,
+    });
+  } catch (err) {
+    console.error("❌ Error adding student:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+});
+
+app.put("/api/students/:id", async (req, res) => {
+  try {
+    const { name, email, university, status, details, updatedAt } = req.body;
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+      req.params.id,
+      { name, email, university, status, details, updatedAt },
+      { new: true }
+    );
+
+    if (!updatedStudent) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Student updated successfully",
+      data: updatedStudent,
+    });
+  } catch (err) {
+    console.error("❌ Error updating student:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+});
+
 /* ------------------------ Mount Routers ------------------------ */
 app.use("/api/signup", signupRoutes);
 app.use("/api/universities", universityRoutes);
@@ -269,9 +361,6 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/universities", scholarshipRoutes);
 app.use("/api/institutes", instituteRoutes);
-app.use("/api/institutes", instituteRoutes);
-
-
 
 /* ------------------------ Health check ------------------------ */
 app.get("/api/health", (req, res) => {

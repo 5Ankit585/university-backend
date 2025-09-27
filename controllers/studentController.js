@@ -1,4 +1,3 @@
-// controllers/studentController.js
 import Student from "../models/Student.js";
 
 export const addStudent = async (req, res) => {
@@ -29,7 +28,7 @@ export const addStudent = async (req, res) => {
       guardianSignature,
     } = req.body;
 
-    // Collect file URLs
+    // Cloudinary URLs
     const documents = {
       marksheet: req.files?.marksheet?.[0]?.path || "",
       tc: req.files?.tc?.[0]?.path || "",
