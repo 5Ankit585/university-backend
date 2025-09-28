@@ -1,6 +1,6 @@
 import express from "express";
 import upload from "../middlewares/multer.js";
-import { addStudent } from "../controllers/studentController.js";
+import { addStudent, getStudents } from "../controllers/studentController.js";
 
 const router = express.Router();
 
@@ -13,6 +13,10 @@ const fields = [
   { name: "paymentReceipt", maxCount: 1 },
 ];
 
+// Add new student
 router.post("/", upload.fields(fields), addStudent);
+
+// Get all students
+router.get("/", getStudents);
 
 export default router;
