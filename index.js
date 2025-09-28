@@ -290,6 +290,7 @@ app.delete("/api/universities/:id", async (req, res) => {
 });
 
 /* ------------------------ Student Routes ------------------------ */
+
 app.post("/api/students", async (req, res) => {
   try {
     const { name, email, university, status, details, createdAt, updatedAt } = req.body;
@@ -347,6 +348,32 @@ app.put("/api/students/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 });
+
+// Get all students
+app.get("/api/students", async (req, res) => {
+  try {
+    const students = await Student.find();
+    res.json(students);
+  } catch (err) {
+    console.error("❌ Error fetching students:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+});
+
+// Delete student
+app.delete("/api/students/:id", async (req, res) => {
+  try {
+    const deleted = await Student.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+    res.json({ success: true, message: "Student deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting student:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+});
+
 
 /* ------------------------ Mount Routers ------------------------ */
 app.use("/api/signup", signupRoutes);
