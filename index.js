@@ -374,6 +374,45 @@ app.delete("/api/students/:id", async (req, res) => {
   }
 });
 
+// ✅ Recent Applications (last 5 students)
+app.get("/api/students/recent", async (req, res) => {
+  try {
+    const recent = await Student.find().sort({ createdAt: -1 }).limit(5);
+    res.json(recent);
+  } catch (err) {
+    console.error("❌ Error fetching recent applications:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/api/students/stats", async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const applicationsThisMonth = await Student.countDocuments({
+      createdAt: { $gte: startOfMonth },
+    });
+
+    const confirmedAdmissions = await Student.countDocuments({ status: "Approved" });
+    const pendingApplications = await Student.countDocuments({ status: "Pending" });
+
+    // Example commission logic (₹500 per confirmed admission)
+    const commissionEarned = confirmedAdmissions * 500;
+
+    res.json({
+      applicationsThisMonth,
+      confirmedAdmissions,
+      commissionEarned,
+      pendingApplications, // 👈 renamed here
+    });
+  } catch (err) {
+    console.error("❌ Error fetching stats:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 
 /* ------------------------ Mount Routers ------------------------ */
 app.use("/api/signup", signupRoutes);
