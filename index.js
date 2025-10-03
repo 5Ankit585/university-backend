@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 import multer from "multer";
 import dotenv from "dotenv";
+import PDFDocument from "pdfkit";
+import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import UniversityRegistration from "./models/University.js";
@@ -412,7 +414,23 @@ app.get("/api/students/stats", async (req, res) => {
   }
 });
 
+// example
+app.get("/api/students/:id/pdf", async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) return res.status(404).send("Student not found");
 
+    // generate PDF dynamically
+    const pdf = generateStudentPdf(student); // <- you need a function here
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="application_${student._id}.pdf"`,
+    });
+    res.send(pdf);
+  } catch (err) {
+    res.status(500).send("Error generating PDF");
+  }
+});
 
 /* ------------------------ Mount Routers ------------------------ */
 app.use("/api/signup", signupRoutes);
