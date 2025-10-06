@@ -37,16 +37,16 @@ router.post("/", uploadAny, async (req, res) => {
       phone,
       email,
       password,
-      address,
-      pincode,
-      university,
-      course,
-      branch,
-      academicDetails,
-      counsellingBook,
+      address = "",        // optional
+      pincode = "",       // optional
+      university = "",    // optional
+      course = "",        // optional
+      branch = "",        // optional
+      academicDetails = "", // optional
+      counsellingBook = "", // optional
     } = req.body || {};
 
-    // Validation
+    // Validation: only required fields
     if (!name || !phone || !email || !password) {
       return res
         .status(400)
@@ -56,9 +56,9 @@ router.post("/", uploadAny, async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Handle file uploads
-    const documentsPath = getUploadedFilePath(req.files, "documents");
-    const scholarshipPath = getUploadedFilePath(req.files, "scholarshipDoc");
+    // Handle file uploads (optional)
+    const documentsPath = getUploadedFilePath(req.files, "documents") || "";
+    const scholarshipPath = getUploadedFilePath(req.files, "scholarshipDoc") || "";
 
     // Save to DB
     const newSignup = new Signup({
@@ -73,8 +73,8 @@ router.post("/", uploadAny, async (req, res) => {
       branch,
       academicDetails,
       counsellingBook,
-      documents: documentsPath,
-      scholarshipDoc: scholarshipPath,
+      documents: documentsPath,    // optional
+      scholarshipDoc: scholarshipPath, // optional
     });
 
     await newSignup.save();
