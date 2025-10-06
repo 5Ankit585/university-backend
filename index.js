@@ -22,6 +22,7 @@ import examRoutes from "./routes/examRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 import signupRoutes from "./routes/signup.js";
 import instituteRoutes from "./routes/instituteRoutes.js";
+import profileRoutes from "./routes/profile.js";
 
 dotenv.config();
 const app = express();
@@ -445,7 +446,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/universities", scholarshipRoutes);
 app.use("/api/institutes", instituteRoutes);
-
+app.use("/api/profile", profileRoutes);
 /* ------------------------ Health check ------------------------ */
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "Server is running" });
