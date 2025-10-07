@@ -16,13 +16,14 @@ const signupSchema = new mongoose.Schema({
   counsellingBook: String,
   documents: String,       // Cloudinary file URL
   scholarshipDoc: String,  // Cloudinary file URL
-  savedCourses: [  // ✅ New field for saved courses
+  savedCourses: [  // Existing field for saved courses
     {
       courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
       courseTitle: String,
       eligibility: String,
     },
   ],
+  savedScholarships: [{ type: mongoose.Schema.Types.ObjectId, ref: "Scholarship" }], // ✅ New field
   createdAt: { type: Date, default: Date.now },
 });
 
