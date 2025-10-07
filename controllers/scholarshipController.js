@@ -3,10 +3,13 @@ import Scholarship from "../models/Scholarship.js";
 // Get all scholarships (global, existing)
 export const getScholarships = async (req, res) => {
   try {
-    const scholarships = await Scholarship.find();
-    res.json(scholarships);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const scholarships = await Scholarship.find()
+      .populate("universityId", "instituteName city state logo"); 
+      // 👆 You can include more fields if you want (city, logo, etc.)
+
+    res.status(200).json(scholarships);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
