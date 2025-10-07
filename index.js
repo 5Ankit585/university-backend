@@ -23,6 +23,8 @@ import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 import signupRoutes from "./routes/signup.js";
 import instituteRoutes from "./routes/instituteRoutes.js";
 import profileRoutes from "./routes/profile.js";
+// ✅ New import for saved courses routes
+import savedCoursesRoutes from "./routes/savedCourses.js";
 
 dotenv.config();
 const app = express();
@@ -55,6 +57,7 @@ app.options("*", cors());
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
 
 /* ------------------------ Multer + Cloudinary ------------------------ */
 const storage = new CloudinaryStorage({
@@ -448,6 +451,9 @@ app.use("/api/scholarships", scholarshipRoutes);
 app.use("/api/universities", scholarshipRoutes);
 app.use("/api/institutes", instituteRoutes);
 app.use("/api/profile", profileRoutes);
+// ✅ New: Mount saved courses routes
+app.use("/api/savedCourses", savedCoursesRoutes);
+
 /* ------------------------ Health check ------------------------ */
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "Server is running" });
