@@ -444,6 +444,7 @@ app.use("/api/universities", placementsRoutes);
 app.use("/api/universities", galleryRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
+app.use("/api/scholarships", scholarshipRoutes);
 app.use("/api/universities", scholarshipRoutes);
 app.use("/api/institutes", instituteRoutes);
 app.use("/api/profile", profileRoutes);
