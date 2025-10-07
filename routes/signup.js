@@ -112,4 +112,40 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Google login route
+router.post("/google-login", async (req, res) => {
+  try {
+    const { email, name, firebaseId } = req.body;
+
+    if (!email || !firebaseId) {
+      return res.status(400).json({ message: "Email and Firebase ID are required" });
+    }
+
+    // Check if user already exists in MongoDB by email
+    let user = await Signup.findOne({ email });
+
+    if (!user) {
+      // Create a new user if not found
+      user = new Signup({
+        name,
+        email,
+        password: "", // empty because Google login
+        firebaseId,
+      });
+
+      await user.save();
+    }
+
+    // Return MongoDB userId and data
+    res.status(200).json({
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } catch (err) {
+    console.error("Google login error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;

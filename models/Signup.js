@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 
 const signupSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  phone: { type: String, required: true },
+  phone: { type: String },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // hashed password
+  password: { type: String }, // hashed password
+  firebaseId: { type: String }, // optional, used for Google login
   address: String,
   pincode: String,
   university: String,
