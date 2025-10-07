@@ -89,4 +89,27 @@ router.post("/", uploadAny, async (req, res) => {
   }
 });
 
+// POST /api/signup/login
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await Signup.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    // ✅ Return MongoDB ID along with name/email
+    res.json({
+      message: "Login successful",
+      userId: user._id,
+      name: user.name,
+      email: user.email
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;
