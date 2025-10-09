@@ -1,14 +1,14 @@
-// routes/savedScholarships.js
 import express from "express";
 import Signup from "../models/Signup.js";
 
 const router = express.Router();
 
-// Get all saved scholarships for a user (populated with full scholarship details)
+// Get all saved scholarships for a user
 router.get("/:userId", async (req, res) => {
   try {
-    const user = await Signup.findById(req.params.userId).populate("savedScholarships");
+    const user = await Signup.findOne({ firebaseId: req.params.userId }).populate("savedScholarships");
     if (!user) return res.status(404).json({ message: "User not found" });
+
     res.json({ success: true, savedScholarships: user.savedScholarships || [] });
   } catch (err) {
     console.error(err);
@@ -19,15 +19,17 @@ router.get("/:userId", async (req, res) => {
 // Save a scholarship
 router.post("/:userId/:scholarshipId", async (req, res) => {
   try {
-    const user = await Signup.findById(req.params.userId);
+    const user = await Signup.findOne({ firebaseId: req.params.userId });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const scholarshipId = req.params.scholarshipId;
+
     if (!user.savedScholarships.includes(scholarshipId)) {
       user.savedScholarships.push(scholarshipId);
       await user.save();
     }
-    const updatedUser = await Signup.findById(req.params.userId).populate("savedScholarships");
+
+    const updatedUser = await Signup.findOne({ firebaseId: req.params.userId }).populate("savedScholarships");
     res.json({ success: true, savedScholarships: updatedUser.savedScholarships || [] });
   } catch (err) {
     console.error(err);
@@ -38,7 +40,7 @@ router.post("/:userId/:scholarshipId", async (req, res) => {
 // Remove a scholarship
 router.delete("/:userId/:scholarshipId", async (req, res) => {
   try {
-    const user = await Signup.findById(req.params.userId);
+    const user = await Signup.findOne({ firebaseId: req.params.userId });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const scholarshipId = req.params.scholarshipId;
@@ -46,7 +48,8 @@ router.delete("/:userId/:scholarshipId", async (req, res) => {
       (id) => id.toString() !== scholarshipId
     );
     await user.save();
-    const updatedUser = await Signup.findById(req.params.userId).populate("savedScholarships");
+
+    const updatedUser = await Signup.findOne({ firebaseId: req.params.userId }).populate("savedScholarships");
     res.json({ success: true, savedScholarships: updatedUser.savedScholarships || [] });
   } catch (err) {
     console.error(err);

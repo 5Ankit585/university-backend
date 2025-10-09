@@ -10,6 +10,16 @@ const signupSchema = new mongoose.Schema({
   address: String,
   pincode: String,
   createdAt: { type: Date, default: Date.now },
+  savedCourses: [
+    {
+      courseId: String,
+      courseTitle: String,
+      eligibility: String,
+    },
+  ],
+  savedScholarships: [
+  { type: mongoose.Schema.Types.ObjectId, ref: "Scholarship" }
+],
 });
 
 const Signup = mongoose.model("Signup", signupSchema);

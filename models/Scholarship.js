@@ -23,6 +23,7 @@ const scholarshipSchema = new mongoose.Schema(
     tags: [String],
   },
   { timestamps: true }
+  
 );
 
 export default mongoose.model("Scholarship", scholarshipSchema);
