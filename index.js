@@ -26,6 +26,7 @@ import profileRoutes from "./routes/profile.js";
 // ✅ New import for saved courses routes
 import savedCoursesRoutes from "./routes/savedCourses.js";
 import savedScholarshipsRoutes from "./routes/savedScholarships.js";
+import counsellingRoutes from "./routes/counselling.js";
 
 dotenv.config();
 const app = express();
@@ -459,9 +460,9 @@ app.use("/api/scholarships", scholarshipRoutes);
 app.use("/api/universities", scholarshipRoutes);
 app.use("/api/institutes", instituteRoutes);
 app.use("/api/profile", profileRoutes);
-// ✅ New: Mount saved courses routes
 app.use("/api/savedCourses", savedCoursesRoutes);
 app.use("/api/savedScholarships", savedScholarshipsRoutes);
+app.use("/api/counselling", counsellingRoutes);
 
 /* ------------------------ Health check ------------------------ */
 app.get("/api/health", (req, res) => {
