@@ -59,6 +59,13 @@ app.options("*", cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
+// ✅ Ensure uploads folder exists (for local file storage)
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
+// ✅ Serve uploaded files publicly (e.g. course images)
+app.use("/uploads", express.static("uploads"));
 
 /* ------------------------ Multer + Cloudinary ------------------------ */
 const storage = new CloudinaryStorage({

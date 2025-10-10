@@ -83,28 +83,29 @@ export const createCourse = async (req, res) => {
 
     // Create new course
     const course = new Course({
-      courseTitle: body.courseTitle,
-      shortName: body.shortName,
-      description: body.description,
-      duration: body.duration,
-      fees: body.fees,
-      mode: body.mode,
-      level: body.level,
-      highlights: body.highlights,
-      internship: body.internship,
-      placement: body.placement,
-      eligibility: body.eligibility,
-      admissionProcess: body.admissionProcess,
-      curriculum: body.curriculum,
-      topInstitutes: body.topInstitutes,
-      careerRoles: body.careerRoles,
-      scholarships: body.scholarships,
-      abroadOptions: body.abroadOptions,
-      faqs: body.faqs,
-      applyLink: body.applyLink,
-      specializations,
-      topInstituteImages: topInstitutesData,
-    });
+  courseTitle: body.courseTitle?.trim(),
+  shortName: body.shortName?.trim(),
+  description: body.description?.trim(),
+  duration: body.duration?.trim(),
+  fees: body.fees?.trim(),
+  mode: body.mode?.trim(),
+  level: body.level?.trim(),
+  highlights: body.highlights?.trim(),
+  internship: body.internship?.trim(),
+  placement: body.placement?.trim(),
+  eligibility: body.eligibility?.trim(),
+  admissionProcess: body.admissionProcess?.trim(),
+  curriculum: body.curriculum?.trim(),
+  topInstitutes: body.topInstitutes?.trim(),
+  careerRoles: body.careerRoles?.trim(),
+  scholarships: body.scholarships?.trim(),
+  abroadOptions: body.abroadOptions?.trim(),
+  faqs: body.faqs?.trim(),
+  applyLink: body.applyLink?.trim(),
+  specializations,
+  topInstituteImages: topInstitutesData,
+});
+
 
     await course.save();
     res.status(201).json(course);
